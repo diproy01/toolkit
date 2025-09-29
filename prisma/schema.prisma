@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// For update changes database: => npx prisma migrate dev --name update_some_tables  //update_some_tables can be any name for generating log file
+// Generate Prisma Client (Optional but Recommended): => npx prisma generate
+//If You Need to Undo Changes (Optional): => npx prisma migrate dev --reset
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+    id          Int     @id @default(autoincrement()) @db.UnsignedInt
+    name        String  @db.VarChar(255)
+    address     String  @db.VarChar(255)
+    status      Int     @default(0)
+    r_datetime  DateTime?
+    m_datetime  DateTime?
+    d_datetime  DateTime?
+
+    users               User[]
+
+    @@map("customers") // Map model to actual table name "customers"
+}
+
+model User {
+    id                    Int       @id @default(autoincrement()) @db.UnsignedInt
+    customer_id           Int?      @db.UnsignedInt
+    last_name             String    @db.VarChar(255)
+    first_name            String    @db.VarChar(255)
+    password              String    @db.VarChar(255)
+    mail                  String    @db.VarChar(255)  
+    phone                 String?   @db.VarChar(20)
+    address               String    @db.VarChar(255)
+    status                Int       @db.TinyInt @default(1)
+    is_ledger             Int       @db.TinyInt @default(0)
+    is_salary             Int       @db.TinyInt @default(0)
+    is_report             Int       @db.TinyInt @default(0)
+    is_sales              Int       @db.TinyInt @default(0)
+    is_systems            Int       @db.TinyInt @default(0)
+    is_admin              Int       @db.TinyInt @default(0)
+    certification_period  DateTime?
+    r_datetime            DateTime? @default(now())
+    m_datetime            DateTime? @default(now())     //Also can use @updatedAt も使用できます
+    d_datetime            DateTime? 
+
+    customer              Customer? @relation(fields: [customer_id], references: [id])
+
+    @@unique([mail, d_datetime])
+
+    @@map("users") // Map model to actual table name "users"
+}
